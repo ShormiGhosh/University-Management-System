@@ -1,13 +1,30 @@
 package com.example.student_management.entity;
 
-import jakarta.persistence.*;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+
 @Entity
+@Table(name = "teachers")
 public class Teacher {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(unique = true)
+    private String employeeId;
 
     @Column(nullable = false)
     private String name;
@@ -22,17 +39,20 @@ public class Teacher {
     @JoinColumn(name = "dept_id")
     private Dept dept;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Course> courses;
 
+    @JsonIgnore
     @OneToOne(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true)
     private User user;
 
     // Constructors
     public Teacher() {}
 
-    public Teacher(Long id, String name, String email, String phone, String specialization) {
+    public Teacher(Long id, String employeeId, String name, String email, String phone, String specialization) {
         this.id = id;
+        this.employeeId = employeeId;
         this.name = name;
         this.email = email;
         this.phone = phone;
@@ -46,6 +66,14 @@ public class Teacher {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getEmployeeId() {
+        return employeeId;
+    }
+
+    public void setEmployeeId(String employeeId) {
+        this.employeeId = employeeId;
     }
 
     public String getName() {

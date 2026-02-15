@@ -7,57 +7,73 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/student.css">
 </head>
 <body>
-<div class="app-container">
-    <!-- Top Navigation -->
-    <header class="top-nav">
-        <div class="nav-logo">
-            <span class="nav-logo-text">UniManager</span>
+<div class="container">
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <h1 class="header-title">🏛️ Departments Management</h1>
         </div>
-        <nav class="nav-menu">
-            <a href="dashboard.html" class="nav-item">Dashboard</a>
-            <a href="students.html" class="nav-item">Students</a>
-            <a href="teachers.html" class="nav-item">Teachers</a>
-            <a href="courses.html" class="nav-item">Courses</a>
-            <a href="departments.html" class="nav-item active">Departments</a>
-            <a href="#" class="nav-item" onclick="logout()">Logout</a>
-        </nav>
+        <div class="header-right">
+            <a href="dashboard.html" class="btn btn-secondary">← Back to Dashboard</a>
+            <button class="btn btn-danger" onclick="logout()">Logout</button>
+        </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="page-header">
-            <h1 class="page-title">Departments</h1>
-            <p class="page-subtitle">Manage university departments</p>
-            <button class="btn btn-primary" onclick="openAddModal()" id="addBtn" style="display: none;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                Add Department
-            </button>
-        </div>
+    <!-- Alert Box -->
+    <div id="alertBox" class="alert" style="display: none;"></div>
 
-        <div class="content-grid">
-            <!-- Search Bar -->
-            <div class="search-bar">
-                <input type="text" placeholder="Search departments..." id="searchInput" onkeyup="filterDepartments()">
+    <!-- Controls -->
+    <div class="controls">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search departments by name or description..." class="search-input">
+            <button onclick="searchDepartments()" class="btn btn-primary">Search</button>
+        </div>
+        <button onclick="openAddModal()" class="btn btn-success">+ Add Department</button>
+    </div>
+
+    <!-- Table Container -->
+    <div id="tableContainer" class="table-wrapper">
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading departments...</p>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div id="deptModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">Add New Department</h2>
+            <button class="close-btn" onclick="closeModal()">×</button>
+        </div>
+        <form id="deptForm" onsubmit="event.preventDefault(); saveDepartment();">
+            <input type="hidden" id="deptId">
+            
+            <div class="form-group">
+                <label for="name">Department Name <span class="required">*</span></label>
+                <input type="text" id="name" class="form-control" placeholder="Enter department name" required>
             </div>
 
-            <!-- Departments Table -->
-            <div class="card">
-                <div class="table-container">
-                    <table class="data-table">
-                        <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Description</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody id="departmentsTableBody">
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" class="form-control" placeholder="Enter description" rows="3"></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" onclick="closeModal()" class="btn btn-secondary">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Department</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="js/dept.js"></script>
+</body>
+</html>
                         <tr>
                             <td colspan="4" class="loading">
                                 <div class="spinner"></div>
