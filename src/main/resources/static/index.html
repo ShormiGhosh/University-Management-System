@@ -42,11 +42,11 @@
             </button>
         </form>
 
-        <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border); text-align: center;">
-            <p style="font-size: 13px; color: var(--text-secondary);">
-                Demo credentials:<br>
-                <strong>Teacher:</strong> teacher / teacher123<br>
-                <strong>Student:</strong> student / student123
+        <div class="demo-credentials">
+            <p>
+                <strong>Demo Credentials:</strong><br>
+                <span class="credential-item">Teacher: teacher / teacher123</span><br>
+                <span class="credential-item">Student: student / student123</span>
             </p>
         </div>
     </div>
@@ -66,78 +66,60 @@
         // Clear previous alerts
         alertContainer.innerHTML = '';
 
-        // Create base64 credentials
-        authCredentials = btoa(username + ':' + password);
-
         try {
-            const response = await fetch('/api/students', {
-                method: 'GET',
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
                 headers: {
-                    'Authorization': 'Basic ' + authCredentials
-                }
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
             });
 
-            if (response.ok) {
-                // Store credentials in session storage
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                // Create base64 credentials for subsequent API calls
+                authCredentials = btoa(username + ':' + password);
+                
+                // Store credentials and role in session storage
                 sessionStorage.setItem('authCredentials', authCredentials);
-                const teacherResponse = await fetch('/api/teachers', {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': 'Basic ' + authCredentials
-                    }
-                });
-
-                // Try to delete to check if teacher
-                sessionStorage.setItem('role', 'USER');
-
-                // Check role by trying teacher-only endpoint
-                try {
-                    const roleCheck = await fetch('/api/departments', {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': 'Basic ' + authCredentials,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({name: '__role_check__', description: 'test'})
-                    });
-                    if (roleCheck.ok || roleCheck.status === 400) {
-                        sessionStorage.setItem('role', 'TEACHER');
-                        // Delete the test record
-                        const data = await roleCheck.json();
-                        if (data.id) {
-                            await fetch('/api/departments/' + data.id, {
-                                method: 'DELETE',
-                                headers: {
-                                    'Authorization': 'Basic ' + authCredentials
-                                }
-                            });
-                        }
-                    }
-                } catch(e) {
-                    sessionStorage.setItem('role', 'STUDENT');
+                sessionStorage.setItem('role', data.role);
+                sessionStorage.setItem('username', data.username);
+                sessionStorage.setItem('id', data.id);
+                if (data.studentId) {
+                    sessionStorage.setItem('studentId', data.studentId);
+                }
+                if (data.teacherId) {
+                    sessionStorage.setItem('teacherId', data.teacherId);
                 }
 
-                // Redirect to dashboard
-                window.location.href = 'dashboard.html';
+                // Redirect based on role
+                if (data.role === 'TEACHER') {
+                    window.location.href = '/teacher/dashboard.html';
+                } else if (data.role === 'STUDENT') {
+                    window.location.href = '/student/dashboard.html';
+                } else {
+                    window.location.href = '/dashboard.html';
+                }
             } else {
                 alertContainer.innerHTML = `
-                        <div class="alert alert-danger">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            Invalid username or password
-                        </div>
-                    `;
-            }
-        } catch (error) {
-            alertContainer.innerHTML = `
                     <div class="alert alert-danger">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        Connection error. Please try again.
+                        ${data.message || 'Invalid username or password'}
                     </div>
                 `;
+            }
+        } catch (error) {
+            alertContainer.innerHTML = `
+                <div class="alert alert-danger">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Connection error. Please try again.
+                </div>
+            `;
         }
     });
 </script>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Departments - University Management System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/student.css">
+</head>
+<body>
+<div class="container">
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <h1 class="header-title">🏛️ Departments Management</h1>
+        </div>
+        <div class="header-right">
+            <a href="dashboard.html" class="btn btn-secondary">← Back to Dashboard</a>
+            <button class="btn btn-danger" onclick="logout()">Logout</button>
+        </div>
+    </header>
+
+    <!-- Alert Box -->
+    <div id="alertBox" class="alert" style="display: none;"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search departments by name or description..." class="search-input">
+            <button onclick="searchDepartments()" class="btn btn-primary">Search</button>
+        </div>
+        <button onclick="openAddModal()" class="btn btn-success">+ Add Department</button>
+    </div>
+
+    <!-- Table Container -->
+    <div id="tableContainer" class="table-wrapper">
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading departments...</p>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div id="deptModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">Add New Department</h2>
+            <button class="close-btn" onclick="closeModal()">×</button>
+        </div>
+        <form id="deptForm" onsubmit="event.preventDefault(); saveDepartment();">
+            <input type="hidden" id="deptId">
+            
+            <div class="form-group">
+                <label for="name">Department Name <span class="required">*</span></label>
+                <input type="text" id="name" class="form-control" placeholder="Enter department name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" class="form-control" placeholder="Enter description" rows="3"></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" onclick="closeModal()" class="btn btn-secondary">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Department</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="../js/dept.js"></script>
+</body>
+</html>

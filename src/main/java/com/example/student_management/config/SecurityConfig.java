@@ -31,26 +31,42 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
-                        .requestMatchers("/api/auth/**").permitAll()
+                        // Public endpoints - login page and assets
+                        .requestMatchers("/", "/index.html", "/css/**", "/js/**", "/api/auth/**").permitAll()
+                        
+                        // Allow all resources in teacher and student folders (HTML, CSS, JS loaded will check via JS)
+                        .requestMatchers("/teacher/**", "/student/**").permitAll()
 
-                        // Course delete - only TEACHER can delete
-                        .requestMatchers(HttpMethod.DELETE, "/api/courses/**").hasRole("TEACHER")
+                        // API endpoints - Course delete only for TEACHER
+                        .requestMatchers(HttpMethod.DELETE, "/api/course/**").hasRole("TEACHER")
+                        .requestMatchers(HttpMethod.POST, "/api/course/**").hasRole("TEACHER")
+                        .requestMatchers(HttpMethod.PUT, "/api/course/**").hasRole("TEACHER")
 
-                        // Student endpoints
-                        // Teachers can do everything with students
+                        // Student endpoints - Teachers can do everything
                         .requestMatchers(HttpMethod.DELETE, "/api/student/**").hasRole("TEACHER")
                         .requestMatchers(HttpMethod.POST, "/api/student/**").hasRole("TEACHER")
+                        .requestMatchers(HttpMethod.PUT, "/api/student/**").hasAnyRole("STUDENT", "TEACHER")
 
-                        // Both can read
+                        // Teacher endpoints - Only TEACHER role
+                        .requestMatchers(HttpMethod.DELETE, "/api/teacher/**").hasRole("TEACHER")
+                        .requestMatchers(HttpMethod.POST, "/api/teacher/**").hasRole("TEACHER")
+                        .requestMatchers(HttpMethod.PUT, "/api/teacher/**").hasRole("TEACHER")
+
+                        // Department endpoints - Only TEACHER role
+                        .requestMatchers(HttpMethod.DELETE, "/api/dept/**").hasRole("TEACHER")
+                        .requestMatchers(HttpMethod.POST, "/api/dept/**").hasRole("TEACHER")
+                        .requestMatchers(HttpMethod.PUT, "/api/dept/**").hasRole("TEACHER")
+
+                        // Both roles can read (GET requests)
                         .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("STUDENT", "TEACHER")
-
-                        // Teachers have full access to all endpoints
-                        .requestMatchers("/api/**").hasRole("TEACHER")
 
                         .anyRequest().authenticated()
                 )
-                .httpBasic(basic -> {})
+                .httpBasic(basic -> basic.authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(401);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"Invalid credentials\"}");
+                }))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();

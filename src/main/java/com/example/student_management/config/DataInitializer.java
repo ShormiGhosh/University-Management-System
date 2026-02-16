@@ -1,10 +1,19 @@
 package com.example.student_management.config;
 
-import com.example.student_management.entity.*;
-import com.example.student_management.repository.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import com.example.student_management.entity.Course;
+import com.example.student_management.entity.Dept;
+import com.example.student_management.entity.Student;
+import com.example.student_management.entity.Teacher;
+import com.example.student_management.entity.User;
+import com.example.student_management.repository.CourseRepository;
+import com.example.student_management.repository.DeptRepository;
+import com.example.student_management.repository.StudentRepository;
+import com.example.student_management.repository.TeacherRepository;
+import com.example.student_management.repository.UserRepository;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -42,6 +51,7 @@ public class DataInitializer implements CommandLineRunner {
 
         // Create Teacher
         Teacher teacher = new Teacher();
+        teacher.setEmployeeId("EMP001");
         teacher.setName("Dr. John Smith");
         teacher.setEmail("john.smith@university.com");
         teacher.setPhone("1234567890");

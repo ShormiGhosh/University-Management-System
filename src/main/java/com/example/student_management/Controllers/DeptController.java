@@ -14,44 +14,44 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.student_management.entity.Teacher;
-import com.example.student_management.service.TeacherService;
+import com.example.student_management.entity.Dept;
+import com.example.student_management.service.DeptService;
 
 @RestController
-@RequestMapping("/api/teacher")
-public class TeacherController {
+@RequestMapping("/api/dept")
+public class DeptController {
 
-    private final TeacherService teacherService;
+    private final DeptService deptService;
 
-    public TeacherController(TeacherService teacherService) {
-        this.teacherService = teacherService;
+    public DeptController(DeptService deptService) {
+        this.deptService = deptService;
     }
 
     @GetMapping
-    public ResponseEntity<List<Teacher>> getAllTeachers() {
-        return ResponseEntity.ok(teacherService.findAll());
+    public ResponseEntity<List<Dept>> getAllDepartments() {
+        return ResponseEntity.ok(deptService.findAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Teacher> getTeacherById(@PathVariable Long id) {
-        return teacherService.findById(id)
+    public ResponseEntity<Dept> getDepartmentById(@PathVariable Long id) {
+        return deptService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
     @PreAuthorize("hasRole('TEACHER')")
-    public ResponseEntity<Teacher> createTeacher(@RequestBody Teacher teacher) {
-        Teacher savedTeacher = teacherService.save(teacher);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedTeacher);
+    public ResponseEntity<Dept> createDepartment(@RequestBody Dept dept) {
+        Dept savedDept = deptService.save(dept);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedDept);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('TEACHER')")
-    public ResponseEntity<Teacher> updateTeacher(@PathVariable Long id, @RequestBody Teacher teacher) {
+    public ResponseEntity<Dept> updateDepartment(@PathVariable Long id, @RequestBody Dept dept) {
         try {
-            Teacher updatedTeacher = teacherService.update(id, teacher);
-            return ResponseEntity.ok(updatedTeacher);
+            Dept updatedDept = deptService.update(id, dept);
+            return ResponseEntity.ok(updatedDept);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
@@ -59,8 +59,8 @@ public class TeacherController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('TEACHER')")
-    public ResponseEntity<Void> deleteTeacher(@PathVariable Long id) {
-        teacherService.deleteById(id);
+    public ResponseEntity<Void> deleteDepartment(@PathVariable Long id) {
+        deptService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 }

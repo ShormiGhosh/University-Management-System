@@ -14,44 +14,44 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.student_management.entity.Teacher;
-import com.example.student_management.service.TeacherService;
+import com.example.student_management.entity.Course;
+import com.example.student_management.service.CourseService;
 
 @RestController
-@RequestMapping("/api/teacher")
-public class TeacherController {
+@RequestMapping("/api/course")
+public class CourseController {
 
-    private final TeacherService teacherService;
+    private final CourseService courseService;
 
-    public TeacherController(TeacherService teacherService) {
-        this.teacherService = teacherService;
+    public CourseController(CourseService courseService) {
+        this.courseService = courseService;
     }
 
     @GetMapping
-    public ResponseEntity<List<Teacher>> getAllTeachers() {
-        return ResponseEntity.ok(teacherService.findAll());
+    public ResponseEntity<List<Course>> getAllCourses() {
+        return ResponseEntity.ok(courseService.findAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Teacher> getTeacherById(@PathVariable Long id) {
-        return teacherService.findById(id)
+    public ResponseEntity<Course> getCourseById(@PathVariable Long id) {
+        return courseService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
     @PreAuthorize("hasRole('TEACHER')")
-    public ResponseEntity<Teacher> createTeacher(@RequestBody Teacher teacher) {
-        Teacher savedTeacher = teacherService.save(teacher);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedTeacher);
+    public ResponseEntity<Course> createCourse(@RequestBody Course course) {
+        Course savedCourse = courseService.save(course);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedCourse);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('TEACHER')")
-    public ResponseEntity<Teacher> updateTeacher(@PathVariable Long id, @RequestBody Teacher teacher) {
+    public ResponseEntity<Course> updateCourse(@PathVariable Long id, @RequestBody Course course) {
         try {
-            Teacher updatedTeacher = teacherService.update(id, teacher);
-            return ResponseEntity.ok(updatedTeacher);
+            Course updatedCourse = courseService.update(id, course);
+            return ResponseEntity.ok(updatedCourse);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
@@ -59,8 +59,8 @@ public class TeacherController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('TEACHER')")
-    public ResponseEntity<Void> deleteTeacher(@PathVariable Long id) {
-        teacherService.deleteById(id);
+    public ResponseEntity<Void> deleteCourse(@PathVariable Long id) {
+        courseService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 }

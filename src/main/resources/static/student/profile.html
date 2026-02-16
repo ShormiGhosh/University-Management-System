@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - University Management System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/student.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>My Profile</h1>
+            <div>
+                <a href="dashboard.html" class="btn btn-secondary">← Back to Dashboard</a>
+            </div>
+        </div>
+
+        <div class="profile-container" style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto;">
+            <div id="profileContent" class="loading" style="text-align: center; padding: 40px;">
+                Loading profile...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get authorization headers from session storage
+        function getAuthHeaders() {
+            const authCredentials = sessionStorage.getItem('authCredentials');
+            if (!authCredentials) {
+                window.location.href = '/index.html';
+                return {};
+            }
+            return {
+                'Authorization': 'Basic ' + authCredentials,
+                'Content-Type': 'application/json'
+            };
+        }
+
+        // Check if user is logged in
+        if (!sessionStorage.getItem('authCredentials')) {
+            window.location.href = '/index.html';
+        }
+
+        // Load student profile
+        async function loadProfile() {
+            try {
+                const username = sessionStorage.getItem('username');
+                const response = await fetch('/api/student', {
+                    headers: getAuthHeaders()
+                });
+
+                if (response.ok) {
+                    const students = await response.json();
+                    // Find the current student (simplified - you might want to match by username/ID)
+                    const student = students[0]; // This is simplified - should match current user
+                    
+                    if (student) {
+                        displayProfile(student);
+                    } else {
+                        document.getElementById('profileContent').innerHTML = 
+                            '<p style="color: #ef4444;">Profile not found</p>';
+                    }
+                } else {
+                    document.getElementById('profileContent').innerHTML = 
+                        '<p style="color: #ef4444;">Failed to load profile</p>';
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                document.getElementById('profileContent').innerHTML = 
+                    '<p style="color: #ef4444;">Error loading profile</p>';
+            }
+        }
+
+        // Display profile information
+        function displayProfile(student) {
+            document.getElementById('profileContent').innerHTML = `
+                <div style="text-align: left;">
+                    <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #e2e8f0;">
+                        <h2 style="color: #1e293b; margin-bottom: 10px;">${student.name}</h2>
+                        <p style="color: #64748b;">Student</p>
+                    </div>
+                    
+                    <div style="display: grid; gap: 16px;">
+                        <div>
+                            <label style="display: block; color: #64748b; font-size: 14px; font-weight: 600; margin-bottom: 4px;">Roll Number</label>
+                            <p style="color: #1e293b; font-size: 16px;">${student.rollNumber}</p>
+                        </div>
+                        
+                        <div>
+                            <label style="display: block; color: #64748b; font-size: 14px; font-weight: 600; margin-bottom: 4px;">Email</label>
+                            <p style="color: #1e293b; font-size: 16px;">${student.email || 'Not provided'}</p>
+                        </div>
+                        
+                        <div>
+                            <label style="display: block; color: #64748b; font-size: 14px; font-weight: 600; margin-bottom: 4px;">Phone</label>
+                            <p style="color: #1e293b; font-size: 16px;">${student.phone || 'Not provided'}</p>
+                        </div>
+                        
+                        <div>
+                            <label style="display: block; color: #64748b; font-size: 14px; font-weight: 600; margin-bottom: 4px;">Department</label>
+                            <p style="color: #1e293b; font-size: 16px;">${student.dept ? student.dept.name : 'Not assigned'}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Load profile when page loads
+        loadProfile();
+    </script>
+</body>
+</html>

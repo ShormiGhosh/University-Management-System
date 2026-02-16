@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Management - University Management System</title>
+    <title>Teacher Management - University Management System</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/student.css">
+    <link rel="stylesheet" href="css/teacher.css">
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Student Management</h1>
+            <h1>Teacher Management</h1>
             <div>
                 <a href="dashboard.html" class="btn btn-secondary">← Back to Dashboard</a>
             </div>
@@ -23,40 +23,40 @@
             
             <div class="action-bar">
                 <div class="search-box">
-                    <input type="text" id="searchInput" placeholder="Search by name, roll number, email...">
-                    <button class="btn btn-secondary" onclick="searchStudents()">Search</button>
+                    <input type="text" id="searchInput" placeholder="Search by name, employee ID, email...">
+                    <button class="btn btn-secondary" onclick="searchTeachers()">Search</button>
                 </div>
-                <button class="btn btn-primary" onclick="openAddModal()">+ Add New Student</button>
+                <button class="btn btn-primary" onclick="openAddModal()">+ Add New Teacher</button>
             </div>
 
             <div id="tableContainer">
                 <div class="loading">
                     <div class="spinner"></div>
-                    <p style="margin-top: 15px;">Loading students...</p>
+                    <p style="margin-top: 15px;">Loading teachers...</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Add/Edit Student Modal -->
-    <div id="studentModal" class="modal">
+    <!-- Add/Edit Teacher Modal -->
+    <div id="teacherModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modalTitle">Add New Student</h2>
+                <h2 id="modalTitle">Add New Teacher</h2>
                 <span class="close" onclick="closeModal()">&times;</span>
             </div>
             <div class="modal-body">
-                <form id="studentForm">
-                    <input type="hidden" id="studentId">
+                <form id="teacherForm">
+                    <input type="hidden" id="teacherId">
                     
                     <div class="form-group">
-                        <label for="rollNumber">Roll Number *</label>
-                        <input type="text" id="rollNumber" required placeholder="Enter roll number">
+                        <label for="employeeId">Employee ID *</label>
+                        <input type="text" id="employeeId" required placeholder="Enter employee ID">
                     </div>
 
                     <div class="form-group">
                         <label for="name">Name *</label>
-                        <input type="text" id="name" required placeholder="Enter student name">
+                        <input type="text" id="name" required placeholder="Enter teacher name">
                     </div>
 
                     <div class="form-group">
@@ -75,15 +75,20 @@
                             <option value="">Select Department</option>
                         </select>
                     </div>
+
+                    <div class="form-group">
+                        <label for="specialization">Specialization</label>
+                        <input type="text" id="specialization" placeholder="Enter specialization">
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                <button class="btn btn-success" onclick="saveStudent()">Save Student</button>
+                <button class="btn btn-success" onclick="saveTeacher()">Save Teacher</button>
             </div>
         </div>
     </div>
 
-    <script src="js/student.js"></script>
+    <script src="js/teacher.js"></script>
 </body>
 </html>

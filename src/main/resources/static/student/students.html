@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management - University Management System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/student.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Student Management</h1>
+            <div>
+                <a href="dashboard.html" class="btn btn-secondary">← Back to Dashboard</a>
+            </div>
+        </div>
+
+        <div class="controls">
+            <input type="text" id="searchInput" class="search-box" placeholder="Search students...">
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Roll Number</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Department</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="studentTable">
+                <tr>
+                    <td colspan="6" class="loading">Loading...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h2>Edit Student</h2>
+            <form id="editForm">
+                <input type="hidden" id="studentId">
+                
+                <div class="form-group">
+                    <label>Roll Number</label>
+                    <input type="text" id="rollNumber" readonly style="background: #f1f5f9; color: #64748b; cursor: not-allowed;">
+                </div>
+
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" id="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" id="phone" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Department</label>
+                    <select id="deptId" required>
+                        <option value="">Select Department</option>
+                    </select>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-success">Save Student</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Get authorization headers from session storage
+        function getAuthHeaders() {
+            const authCredentials = sessionStorage.getItem('authCredentials');
+            if (!authCredentials) {
+                window.location.href = '/index.html';
+                return {};
+            }
+            return {
+                'Authorization': 'Basic ' + authCredentials,
+                'Content-Type': 'application/json'
+            };
+        }
+
+        // Check if user is logged in
+        if (!sessionStorage.getItem('authCredentials')) {
+            window.location.href = '/index.html';
+        }
+
+        let students = [];
+        let departments = [];
+
+        // Load departments
+        async function loadDepartments() {
+            try {
+                const response = await fetch('/api/dept', {
+                    headers: getAuthHeaders()
+                });
+
+                if (response.ok) {
+                    departments = await response.json();
+                    populateDepartmentDropdown();
+                }
+            } catch (error) {
+                console.error('Error loading departments:', error);
+            }
+        }
+
+        // Populate department dropdown
+        function populateDepartmentDropdown() {
+            const select = document.getElementById('deptId');
+            select.innerHTML = '<option value="">Select Department</option>';
+            departments.forEach(dept => {
+                select.innerHTML += `<option value="${dept.id}">${dept.name}</option>`;
+            });
+        }
+
+        // Load students
+        async function loadStudents() {
+            try {
+                const response = await fetch('/api/student', {
+                    headers: getAuthHeaders()
+                });
+
+                if (response.ok) {
+                    students = await response.json();
+                    displayStudents(students);
+                } else {
+                    document.getElementById('studentTable').innerHTML = 
+                        '<tr><td colspan="6" style="text-align: center;">Failed to load students</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading students:', error);
+                document.getElementById('studentTable').innerHTML = 
+                    '<tr><td colspan="6" style="text-align: center;">Error loading students</td></tr>';
+            }
+        }
+
+        // Display students
+        function displayStudents(studentsArray) {
+            const tbody = document.getElementById('studentTable');
+            
+            if (studentsArray.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No students found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = studentsArray.map(student => `
+                <tr>
+                    <td><strong>${student.rollNumber}</strong></td>
+                    <td>${student.name}</td>
+                    <td>${student.email || '-'}</td>
+                    <td>${student.phone || '-'}</td>
+                    <td>${student.dept ? student.dept.name : '-'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="editStudent(${student.id})">Edit</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredStudents = students.filter(student =>
+                student.name.toLowerCase().includes(searchTerm) ||
+                student.rollNumber.toLowerCase().includes(searchTerm) ||
+                (student.email && student.email.toLowerCase().includes(searchTerm))
+            );
+            displayStudents(filteredStudents);
+        });
+
+        // Edit student
+        function editStudent(id) {
+            const student = students.find(s => s.id === id);
+            if (student) {
+                document.getElementById('studentId').value = student.id;
+                document.getElementById('rollNumber').value = student.rollNumber || '';
+                document.getElementById('name').value = student.name || '';
+                document.getElementById('email').value = student.email || '';
+                document.getElementById('phone').value = student.phone || '';
+                document.getElementById('deptId').value = student.dept ? student.dept.id : '';
+                
+                document.getElementById('editModal').style.display = 'flex';
+            }
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        // Save student
+        document.getElementById('editForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const studentId = document.getElementById('studentId').value;
+            const deptId = document.getElementById('deptId').value;
+            
+            const studentData = {
+                id: parseInt(studentId),
+                rollNumber: document.getElementById('rollNumber').value,
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                dept: deptId ? { id: parseInt(deptId) } : null
+            };
+
+            try {
+                const response = await fetch(`/api/student/${studentId}`, {
+                    method: 'PUT',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(studentData)
+                });
+
+                if (response.ok) {
+                    alert('Student updated successfully!');
+                    closeModal();
+                    loadStudents();
+                } else {
+                    alert('Failed to update student');
+                }
+            } catch (error) {
+                console.error('Error updating student:', error);
+                alert('Error updating student');
+            }
+        });
+
+        // Load departments and students when page loads
+        loadDepartments();
+        loadStudents();
+    </script>
+</body>
+</html>

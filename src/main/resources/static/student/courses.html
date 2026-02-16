@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Courses - University Management System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/student.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>My Courses</h1>
+            <div>
+                <a href="dashboard.html" class="btn btn-secondary">← Back to Dashboard</a>
+            </div>
+        </div>
+
+        <div class="controls">
+            <input type="text" id="searchInput" class="search-box" placeholder="Search courses...">
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Course Name</th>
+                    <th>Credits</th>
+                    <th>Department</th>
+                    <th>Teacher</th>
+                </tr>
+            </thead>
+            <tbody id="courseTable">
+                <tr>
+                    <td colspan="5" class="loading">Loading...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Get authorization headers from session storage
+        function getAuthHeaders() {
+            const authCredentials = sessionStorage.getItem('authCredentials');
+            if (!authCredentials) {
+                window.location.href = '/index.html';
+                return {};
+            }
+            return {
+                'Authorization': 'Basic ' + authCredentials,
+                'Content-Type': 'application/json'
+            };
+        }
+
+        // Check if user is logged in
+        if (!sessionStorage.getItem('authCredentials')) {
+            window.location.href = '/index.html';
+        }
+
+        let courses = [];
+
+        // Load courses from API
+        async function loadCourses() {
+            try {
+                const response = await fetch('/api/course', {
+                    headers: getAuthHeaders()
+                });
+
+                if (response.ok) {
+                    courses = await response.json();
+                    displayCourses(courses);
+                } else {
+                    document.getElementById('courseTable').innerHTML = 
+                        '<tr><td colspan="5" style="text-align: center;">Failed to load courses</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading courses:', error);
+                document.getElementById('courseTable').innerHTML = 
+                    '<tr><td colspan="5" style="text-align: center;">Error loading courses</td></tr>';
+            }
+        }
+
+        // Display courses in table
+        function displayCourses(coursesArray) {
+            const tbody = document.getElementById('courseTable');
+            
+            if (coursesArray.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No courses found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = coursesArray.map(course => `
+                <tr>
+                    <td><strong>${course.code}</strong></td>
+                    <td>${course.name}</td>
+                    <td>${course.credits}</td>
+                    <td>${course.dept ? course.dept.name : '-'}</td>
+                    <td>${course.teacher ? course.teacher.name : '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredCourses = courses.filter(course =>
+                course.name.toLowerCase().includes(searchTerm) ||
+                course.code.toLowerCase().includes(searchTerm) ||
+                (course.dept && course.dept.name.toLowerCase().includes(searchTerm))
+            );
+            displayCourses(filteredCourses);
+        });
+
+        // Load courses when page loads
+        loadCourses();
+    </script>
+</body>
+</html>
